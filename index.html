@@ -162,25 +162,12 @@
           <p>마우스 휠이나 ← → 키로 덱을 움직인 뒤 마음에 든 카드를 선택하세요.</p>
         </header>
         <p class="card-position-instruction" data-position-instruction></p>
-        <div class="card-stack-wrapper">
-          <div
-            class="card-stack"
-            data-card-stack
-            aria-label="카드 덱"
-            tabindex="0"
-          ></div>
-          <p class="stack-hint">
-            덱을 넘기며 원하는 지점에서 멈추고 카드를 선택하세요.
-          </p>
-          <div class="card-stack-controls" data-stack-controls>
-            <button class="stack-control-button" type="button" data-stack-prev>
-              ‹
-            </button>
-            <button class="stack-control-button" type="button" data-stack-next>
-              ›
-            </button>
-          </div>
+        <div class="card-slider" data-card-slider>
+          <div class="card-track" data-card-track aria-label="카드 덱"></div>
         </div>
+        <p class="slider-hint">
+          좌우로 넘기며 마음에 드는 카드에 멈춘 뒤 선택 버튼을 눌러주세요.
+        </p>
         <div class="card-picker-actions">
           <button class="primary" data-pick-card>이 카드 선택</button>
         </div>
