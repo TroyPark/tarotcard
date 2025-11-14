@@ -235,6 +235,8 @@ const state = {
   dropdownOpen: false,
   touchStartX: null,
   touchStartY: null,
+  touchLastX: null,
+  touchLastY: null,
   touchActive: false,
 };
 
@@ -783,6 +785,8 @@ function handleTouchStart(event) {
   if (!touch) return;
   state.touchStartX = touch.clientX;
   state.touchStartY = touch.clientY;
+  state.touchLastX = touch.clientX;
+  state.touchLastY = touch.clientY;
   state.touchActive = true;
 }
 
@@ -793,26 +797,40 @@ function handleTouchMove(event) {
   const touch = event.touches[0];
   if (!touch) return;
 
+  state.touchLastX = touch.clientX;
+  state.touchLastY = touch.clientY;
+
   const deltaX = touch.clientX - state.touchStartX;
   const deltaY = touch.clientY - state.touchStartY;
 
-  if (Math.abs(deltaX) < 20 || Math.abs(deltaX) < Math.abs(deltaY)) {
+  if (Math.abs(deltaX) < 15 || Math.abs(deltaX) < Math.abs(deltaY)) {
     return;
   }
 
   event.preventDefault();
-  state.touchActive = false;
-  if (deltaX > 0) {
-    shiftDeckIndex(-1);
-  } else {
-    shiftDeckIndex(1);
-  }
+  // keep active; actual shift will happen on touchend to avoid multiple triggers
 }
 
 function handleTouchEnd() {
+  if (state.touchActive && state.touchStartX !== null && state.touchLastX !== null) {
+    const deltaX = state.touchLastX - state.touchStartX;
+    const deltaY =
+      state.touchLastY !== null && state.touchStartY !== null
+        ? state.touchLastY - state.touchStartY
+        : 0;
+    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        shiftDeckIndex(-1);
+      } else {
+        shiftDeckIndex(1);
+      }
+    }
+  }
   state.touchActive = false;
   state.touchStartX = null;
   state.touchStartY = null;
+  state.touchLastX = null;
+  state.touchLastY = null;
 }
 
 function pickCurrentCard() {
