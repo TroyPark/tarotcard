@@ -1,28 +1,28 @@
 :root {
   color-scheme: dark;
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
-  --bg-top: #010103;
-  --bg-mid: #02000a;
-  --bg-bottom: #03000f;
-  --nebula-1: rgba(32, 12, 74, 0.36);
-  --nebula-2: rgba(0, 84, 180, 0.22);
-  --nebula-3: rgba(130, 0, 199, 0.18);
-  --panel-bg: rgba(20, 10, 40, 0.85);
-  --panel-border: rgba(138, 98, 198, 0.3);
-  --panel-shadow: 0 42px 90px rgba(4, 0, 20, 0.85);
-  --text-primary: #f7f0ff;
-  --text-secondary: #dde6ff;
-  --text-muted: #a9b6df;
-  --primary-gradient: linear-gradient(135deg, #1959ff 0%, #531fff 55%, #ff1ac0 100%);
-  --primary-shadow: 0 24px 58px rgba(46, 112, 255, 0.55);
-  --primary-hover-shadow: 0 30px 76px rgba(255, 46, 176, 0.6);
-  --secondary-bg: rgba(10, 19, 52, 0.62);
-  --secondary-border: rgba(52, 106, 214, 0.42);
-  --accent-outline: rgba(47, 102, 214, 0.42);
-  --chip-bg: rgba(20, 52, 118, 0.52);
-  --chip-color: #cadeff;
-  --stack-shadow: 0 55px 120px rgba(0, 0, 10, 0.92);
-  --focus-ring: 0 0 0 3px rgba(58, 118, 228, 0.6);
+  --bg-top: #040713;
+  --bg-mid: #081024;
+  --bg-bottom: #0e162c;
+  --nebula-1: rgba(78, 56, 146, 0.32);
+  --nebula-2: rgba(38, 132, 210, 0.26);
+  --nebula-3: rgba(237, 178, 109, 0.2);
+  --panel-bg: linear-gradient(160deg, rgba(24, 30, 59, 0.9), rgba(12, 18, 36, 0.92));
+  --panel-border: rgba(134, 186, 255, 0.28);
+  --panel-shadow: 0 32px 90px rgba(4, 10, 40, 0.65);
+  --text-primary: #f4f7ff;
+  --text-secondary: #dbe2f6;
+  --text-muted: #aeb8d9;
+  --primary-gradient: linear-gradient(135deg, #3dd7e6 0%, #6570ff 55%, #f6b971 100%);
+  --primary-shadow: 0 24px 60px rgba(83, 135, 255, 0.55);
+  --primary-hover-shadow: 0 28px 76px rgba(247, 185, 113, 0.55);
+  --secondary-bg: linear-gradient(135deg, rgba(23, 36, 68, 0.82), rgba(14, 24, 48, 0.88));
+  --secondary-border: rgba(104, 156, 255, 0.45);
+  --accent-outline: rgba(243, 201, 118, 0.54);
+  --chip-bg: rgba(48, 86, 156, 0.55);
+  --chip-color: #f7e3c2;
+  --stack-shadow: 0 50px 110px rgba(2, 6, 30, 0.82);
+  --focus-ring: 0 0 0 3px rgba(244, 196, 118, 0.55);
 }
 
 *,
@@ -36,14 +36,15 @@ body {
   min-height: 100vh;
   color: var(--text-primary);
   background:
-    radial-gradient(ellipse at top, rgba(75, 0, 130, 0.28), transparent 58%),
-    radial-gradient(ellipse at bottom, rgba(25, 0, 51, 0.42), transparent 55%),
-    linear-gradient(180deg, rgba(10, 0, 21, 0.92) 0%, rgba(26, 11, 46, 0.75) 48%, rgba(15, 5, 25, 0.92) 100%),
+    radial-gradient(ellipse at 18% 12%, rgba(94, 58, 170, 0.32), transparent 60%),
+    radial-gradient(ellipse at 82% 18%, rgba(46, 136, 204, 0.24), transparent 58%),
+    radial-gradient(ellipse at 48% 78%, rgba(238, 181, 112, 0.18), transparent 64%),
+    linear-gradient(180deg, rgba(11, 16, 34, 0.94) 0%, rgba(15, 22, 40, 0.86) 48%, rgba(7, 10, 26, 0.94) 100%),
     url("tarot_background_dark_mystical.png");
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
-  background-size: 160% 160%, 160% 160%, 160% 160%, cover;
-  background-position: center top, center bottom, center center, center;
-  background-attachment: fixed, fixed, fixed, fixed;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 170% 170%, 170% 170%, 160% 160%, 160% 160%, cover;
+  background-position: center top, center 18%, center 85%, center, center;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
 }
 
 button,
@@ -59,7 +60,7 @@ textarea {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: #e8d5ff;
+  color: var(--text-secondary);
 }
 
 .app-shell::before,
@@ -169,15 +170,15 @@ textarea {
   width: 100%;
   padding: 0.9rem 1.2rem;
   border-radius: 18px;
-  border: 1px solid rgba(63, 125, 255, 0.45);
-  background: rgba(5, 12, 35, 0.9);
+  border: 1px solid rgba(128, 182, 255, 0.46);
+  background: linear-gradient(135deg, rgba(22, 32, 68, 0.92), rgba(12, 20, 46, 0.9));
   color: var(--text-primary);
   font-size: 1.05rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: border 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  transition: border 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
 }
 
 .dropdown-toggle:focus-visible {
@@ -187,8 +188,9 @@ textarea {
 
 .dropdown-toggle.open {
   transform: translateY(-2px);
-  box-shadow: 0 20px 46px rgba(64, 124, 255, 0.45);
-  border-color: rgba(90, 182, 255, 0.62);
+  box-shadow: 0 18px 46px rgba(110, 164, 255, 0.45);
+  border-color: rgba(244, 196, 118, 0.58);
+  background: linear-gradient(135deg, rgba(32, 52, 98, 0.94), rgba(18, 28, 60, 0.92));
 }
 
 .dropdown-icon {
@@ -205,15 +207,15 @@ textarea {
   padding: 0.65rem;
   margin: 0;
   list-style: none;
-  background: rgba(4, 10, 31, 0.96);
+  background: linear-gradient(160deg, rgba(20, 32, 70, 0.96), rgba(12, 18, 40, 0.94));
   border-radius: 22px;
-  border: 1px solid rgba(76, 144, 255, 0.35);
-  box-shadow: 0 34px 80px rgba(0, 6, 26, 0.8);
+  border: 1px solid rgba(144, 196, 255, 0.32);
+  box-shadow: 0 34px 80px rgba(5, 10, 30, 0.72);
   display: grid;
   gap: 0.5rem;
   max-height: 370px;
   overflow-y: auto;
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
 }
 
 .dropdown-menu.hidden {
@@ -226,18 +228,19 @@ textarea {
   text-align: left;
   padding: 0.95rem 1.2rem;
   border-radius: 16px;
-  border: 1px solid transparent;
-  background: linear-gradient(140deg, rgba(22, 45, 105, 0.65), rgba(21, 34, 85, 0.48));
+  border: 1px solid rgba(112, 162, 255, 0.28);
+  background: linear-gradient(150deg, rgba(34, 58, 116, 0.7), rgba(24, 38, 88, 0.6));
   color: var(--text-primary);
   cursor: pointer;
-  transition: transform 0.16s ease, border 0.16s ease, background 0.16s ease;
+  transition: transform 0.16s ease, border 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
   transform: translateY(-3px);
-  border-color: rgba(94, 171, 255, 0.65);
-  background: linear-gradient(140deg, rgba(34, 80, 180, 0.78), rgba(40, 102, 212, 0.62));
+  border-color: rgba(244, 196, 118, 0.7);
+  background: linear-gradient(150deg, rgba(84, 136, 216, 0.84), rgba(245, 193, 118, 0.62));
+  box-shadow: 0 18px 40px rgba(12, 20, 54, 0.55);
 }
 
 .dropdown-item h3 {
@@ -255,8 +258,9 @@ textarea {
 .selection-summary {
   padding: 1.4rem 1.6rem;
   border-radius: 22px;
-  background: linear-gradient(160deg, rgba(12, 26, 64, 0.78), rgba(13, 18, 46, 0.6));
-  border: 1px solid rgba(67, 132, 255, 0.35);
+  background: linear-gradient(150deg, rgba(26, 38, 78, 0.85), rgba(16, 26, 60, 0.74));
+  border: 1px solid rgba(140, 192, 255, 0.32);
+  box-shadow: 0 20px 44px rgba(8, 12, 32, 0.5);
   color: var(--text-secondary);
   min-height: 110px;
 }
@@ -358,11 +362,11 @@ textarea {
   align-content: center;
   padding: 1.6rem 1.8rem;
   border-radius: 22px;
-  border: 1px dashed rgba(76, 144, 255, 0.28);
-  background: linear-gradient(150deg, rgba(9, 16, 42, 0.92), rgba(6, 12, 32, 0.88));
+  border: 1px dashed rgba(244, 196, 118, 0.38);
+  background: linear-gradient(150deg, rgba(28, 42, 88, 0.9), rgba(18, 28, 60, 0.86));
   text-align: center;
   color: var(--text-secondary);
-  box-shadow: 0 18px 48px rgba(3, 4, 20, 0.45);
+  box-shadow: 0 18px 48px rgba(4, 8, 26, 0.5);
 }
 
 .card-picker-intro p {
@@ -372,10 +376,10 @@ textarea {
 }
 
 .position-guide {
-  background: linear-gradient(160deg, rgba(14, 30, 72, 0.9), rgba(7, 16, 43, 0.92));
+  background: linear-gradient(160deg, rgba(24, 38, 82, 0.92), rgba(16, 26, 64, 0.9));
   border-radius: 20px;
   padding: 1.3rem 1.5rem;
-  border: 1px solid rgba(60, 128, 255, 0.38);
+  border: 1px solid rgba(244, 196, 118, 0.32);
   color: var(--text-secondary);
 }
 
@@ -413,12 +417,12 @@ textarea {
 
 .card-slider::before {
   left: 0;
-  background: linear-gradient(90deg, rgba(6, 8, 30, 0.85), transparent);
+  background: linear-gradient(90deg, rgba(10, 14, 34, 0.88), transparent);
 }
 
 .card-slider::after {
   right: 0;
-  background: linear-gradient(270deg, rgba(6, 8, 30, 0.85), transparent);
+  background: linear-gradient(270deg, rgba(10, 14, 34, 0.88), transparent);
 }
 
 .card-track {
@@ -467,7 +471,7 @@ textarea {
   display: block;
   border-radius: 22px;
   box-shadow: 0 24px 65px rgba(8, 6, 24, 0.45);
-  border: 1px solid rgba(160, 176, 255, 0.16);
+  border: 1px solid rgba(244, 196, 118, 0.24);
 }
 
 .card-option::after {
@@ -475,17 +479,17 @@ textarea {
   position: absolute;
   inset: 0;
   border-radius: 22px;
-  border: 1px solid transparent;
+  border: 1px solid rgba(244, 196, 118, 0.18);
   transition: border 0.22s ease;
 }
 
 .card-option.active {
   transform: scale(1);
-  box-shadow: 0 18px 45px rgba(40, 68, 255, 0.35);
+  box-shadow: 0 18px 45px rgba(244, 196, 118, 0.35);
 }
 
 .card-option.active::after {
-  border-color: rgba(132, 160, 255, 0.6);
+  border-color: rgba(244, 196, 118, 0.42);
 }
 
 .slider-hint {
@@ -674,10 +678,10 @@ textarea {
   border-radius: 26px;
   padding: 0;
   width: min(92vw, 520px);
-  background: rgba(9, 10, 28, 0.96);
+  background: linear-gradient(165deg, rgba(20, 28, 58, 0.96), rgba(11, 18, 38, 0.94));
   color: var(--text-secondary);
-  box-shadow: 0 38px 90px rgba(0, 0, 20, 0.78);
-  backdrop-filter: blur(22px);
+  box-shadow: 0 38px 90px rgba(2, 6, 24, 0.78);
+  backdrop-filter: blur(24px);
   position: relative;
 }
 
@@ -727,8 +731,8 @@ textarea {
   margin: 0;
   padding: 0.85rem 1rem;
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(16, 26, 64, 0.82), rgba(9, 15, 40, 0.78));
-  border: 1px solid rgba(82, 143, 255, 0.26);
+  background: linear-gradient(150deg, rgba(30, 48, 98, 0.88), rgba(18, 28, 64, 0.82));
+  border: 1px solid rgba(244, 196, 118, 0.32);
   color: var(--text-secondary);
   font-size: 0.98rem;
   line-height: 1.5;
@@ -751,9 +755,9 @@ textarea {
   gap: 1.1rem;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   padding: 1.4rem 1.6rem;
-  background: linear-gradient(150deg, rgba(7, 16, 45, 0.92), rgba(5, 12, 38, 0.88));
+  background: linear-gradient(150deg, rgba(22, 32, 70, 0.92), rgba(14, 22, 50, 0.88));
   border-radius: 22px;
-  border: 1px dashed rgba(63, 138, 255, 0.32);
+  border: 1px dashed rgba(140, 192, 255, 0.32);
 }
 
 .preview-slot {
@@ -762,8 +766,8 @@ textarea {
   justify-items: center;
   padding: 0.85rem;
   border-radius: 18px;
-  background: rgba(4, 9, 32, 0.92);
-  border: 1px solid rgba(75, 142, 255, 0.26);
+  background: linear-gradient(150deg, rgba(24, 36, 78, 0.92), rgba(14, 22, 52, 0.9));
+  border: 1px solid rgba(244, 196, 118, 0.28);
   color: var(--text-secondary);
 }
 
@@ -799,7 +803,7 @@ textarea {
 .preview-slot p {
   margin: 0;
   font-size: 0.96rem;
-  color: var(--text-secondary);
+  color: #f6c372;
 }
 
 .drawing-actions {
@@ -823,8 +827,8 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 1.2rem;
-  background: rgba(5, 6, 18, 0.68);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(160deg, rgba(10, 16, 36, 0.78), rgba(4, 8, 22, 0.82));
+  backdrop-filter: blur(14px);
   border-radius: 22px;
   color: var(--text-secondary);
   font-size: 1.05rem;
@@ -841,8 +845,8 @@ textarea {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  border: 4px solid rgba(120, 150, 255, 0.3);
-  border-top-color: rgba(120, 150, 255, 0.9);
+  border: 4px solid rgba(118, 158, 255, 0.3);
+  border-top-color: rgba(244, 196, 118, 0.9);
   animation: spin 0.9s linear infinite;
 }
 
@@ -868,11 +872,11 @@ textarea {
 .result-card {
   display: grid;
   gap: 0.9rem;
-  padding: 1.1rem;
+  padding: 1.15rem;
   border-radius: 20px;
-  background: rgba(5, 10, 32, 0.92);
-  border: 1px solid rgba(74, 143, 255, 0.32);
-  box-shadow: 0 26px 58px rgba(1, 5, 25, 0.7);
+  background: linear-gradient(160deg, rgba(24, 34, 72, 0.92), rgba(14, 22, 50, 0.9));
+  border: 1px solid rgba(244, 196, 118, 0.28);
+  box-shadow: 0 26px 58px rgba(4, 10, 34, 0.68);
 }
 
 .result-card h4 {
@@ -904,7 +908,7 @@ textarea {
 
 .result-card .card-keywords {
   font-weight: 600;
-  color: #79baff;
+  color: #f6c372;
   font-size: 0.95rem;
 }
 
@@ -912,8 +916,9 @@ textarea {
 .result-keywords {
   padding: 1.35rem 1.6rem;
   border-radius: 22px;
-  background: linear-gradient(160deg, rgba(10, 20, 54, 0.9), rgba(6, 12, 36, 0.85));
-  border: 1px solid rgba(68, 132, 255, 0.32);
+  background: linear-gradient(155deg, rgba(22, 34, 74, 0.92), rgba(14, 24, 56, 0.86));
+  border: 1px solid rgba(140, 192, 255, 0.3);
+  box-shadow: 0 20px 48px rgba(6, 10, 30, 0.55);
   color: var(--text-secondary);
 }
 
@@ -1049,10 +1054,10 @@ textarea {
   border-radius: 26px;
   padding: 0;
   width: min(92vw, 720px);
-  background: rgba(8, 9, 28, 0.96);
+  background: linear-gradient(165deg, rgba(20, 30, 60, 0.96), rgba(12, 18, 38, 0.94));
   color: var(--text-secondary);
-  box-shadow: 0 40px 100px rgba(0, 0, 20, 0.82);
-  backdrop-filter: blur(20px);
+  box-shadow: 0 40px 100px rgba(2, 8, 26, 0.82);
+  backdrop-filter: blur(22px);
 }
 
 .intro-video-modal::backdrop {
@@ -1085,7 +1090,7 @@ textarea {
   border-radius: 22px;
   overflow: hidden;
   box-shadow: 0 30px 90px rgba(12, 8, 40, 0.6);
-  border: 1px solid rgba(120, 150, 255, 0.22);
+  border: 1px solid rgba(244, 196, 118, 0.32);
   width: min(70vw, 340px);
 }
 
@@ -1094,7 +1099,7 @@ textarea {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(12, 18, 52, 0.18), transparent 30%);
+  background: linear-gradient(180deg, rgba(32, 42, 88, 0.22), transparent 35%);
 }
 
 .intro-video-frame video,
