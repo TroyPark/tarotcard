@@ -278,6 +278,7 @@ const elements = {
     overallSummary: document.querySelector("[data-overall-summary]"),
     keywordChips: document.querySelector("[data-keyword-chips]"),
     restart: document.querySelector("[data-restart]"),
+    loading: document.querySelector("[data-result-loading]"),
   },
 };
 
@@ -731,7 +732,9 @@ function handleWheel(event) {
   if (Math.abs(event.deltaY) < 1) return;
 
   event.preventDefault();
-  const direction = event.deltaY > 0 ? 1 : -1;
+  const normalized = Math.max(-40, Math.min(40, event.deltaY));
+  const delta = Math.round(normalized / 8);
+  const direction = delta !== 0 ? delta : normalized > 0 ? 1 : -1;
   shiftDeckIndex(direction);
 }
 
@@ -819,11 +822,9 @@ function handleTouchEnd() {
         ? state.touchLastY - state.touchStartY
         : 0;
     if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        shiftDeckIndex(-1);
-      } else {
-        shiftDeckIndex(1);
-      }
+      const normalized = Math.max(-200, Math.min(200, deltaX));
+      const steps = Math.round(normalized / 40) || (deltaX > 0 ? -1 : 1);
+      shiftDeckIndex(steps);
     }
   }
   state.touchActive = false;
@@ -872,13 +873,29 @@ function showResults() {
   if (!category) return;
   if (state.selectedCards.length < category.requiredCards) return;
 
-  renderResults();
+  renderResults(true);
   updateView("results");
+
+  window.setTimeout(() => {
+    renderResults(false);
+  }, 1500);
 }
 
-function renderResults() {
+function renderResults(isLoadingOnly = false) {
   const category = state.selectedCategory;
   if (!category) return;
+
+  if (elements.results.loading) {
+    if (isLoadingOnly) {
+      elements.results.loading.classList.remove("hidden");
+    } else {
+      elements.results.loading.classList.add("hidden");
+    }
+  }
+
+  if (isLoadingOnly) {
+    return;
+  }
 
   elements.results.title.textContent = `${category.label} 리딩 결과`;
   elements.results.description.textContent = category.resultDescription;
