@@ -732,9 +732,9 @@ function handleWheel(event) {
   if (Math.abs(event.deltaY) < 1) return;
 
   event.preventDefault();
-  const normalized = Math.max(-40, Math.min(40, event.deltaY));
-  const delta = Math.round(normalized / 8);
-  const direction = delta !== 0 ? delta : normalized > 0 ? 1 : -1;
+  const normalized = Math.max(-160, Math.min(160, event.deltaY));
+  const delta = Math.round(normalized / 4);
+  const direction = delta !== 0 ? delta : normalized > 0 ? 2 : -2;
   shiftDeckIndex(direction);
 }
 
@@ -821,9 +821,9 @@ function handleTouchEnd() {
       state.touchLastY !== null && state.touchStartY !== null
         ? state.touchLastY - state.touchStartY
         : 0;
-    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      const normalized = Math.max(-200, Math.min(200, deltaX));
-      const steps = Math.round(normalized / 40) || (deltaX > 0 ? -1 : 1);
+    if (Math.abs(deltaX) > 25 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      const normalized = Math.max(-400, Math.min(400, deltaX));
+      const steps = Math.round(normalized / 25) || (deltaX > 0 ? -2 : 2);
       shiftDeckIndex(steps);
     }
   }
