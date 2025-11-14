@@ -1111,10 +1111,6 @@ textarea {
   background: #000;
 }
 
-.intro-video-actions {
-  display: none;
-}
-
 .intro-video-actions .secondary {
   min-width: 160px;
 }
