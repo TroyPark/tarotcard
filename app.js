@@ -233,11 +233,13 @@ const state = {
   currentIndex: 0,
   view: "landing",
   dropdownOpen: false,
-  touchStartX: null,
-  touchStartY: null,
-  touchLastX: null,
-  touchLastY: null,
-  touchActive: false,
+  cardButtons: [],
+  scrollRAF: null,
+  isDragging: false,
+  dragStartX: 0,
+  dragStartScrollLeft: 0,
+  isIntroPlaying: false,
+  introTimeoutId: null,
 };
 
 const elements = {
@@ -252,6 +254,11 @@ const elements = {
   selectionSummary: document.querySelector("[data-selection-summary]"),
   startButton: document.querySelector("[data-start]"),
   resetAllButton: document.querySelector("[data-reset-all]"),
+  intro: {
+    dialog: document.querySelector("[data-intro-dialog]"),
+    gif: document.querySelector("[data-intro-gif]"),
+    skip: document.querySelector("[data-intro-skip]"),
+  },
   drawing: {
     title: document.querySelector("[data-view-title]"),
     description: document.querySelector("[data-view-description]"),
@@ -261,12 +268,9 @@ const elements = {
     openPicker: document.querySelector("[data-open-picker]"),
     pickerDialog: document.querySelector("[data-card-picker]"),
     positionInstruction: document.querySelector("[data-position-instruction]"),
-    cardStack: document.querySelector("[data-card-stack]"),
+    cardTrack: document.querySelector("[data-card-track]"),
     pickButton: document.querySelector("[data-pick-card]"),
     closePicker: document.querySelector("[data-close-picker]"),
-    stackControls: document.querySelector("[data-stack-controls]"),
-    stackPrev: document.querySelector("[data-stack-prev]"),
-    stackNext: document.querySelector("[data-stack-next]"),
     preview: document.querySelector("[data-selected-preview]"),
     showResults: document.querySelector("[data-show-results]"),
     backToCategory: document.querySelector("[data-back-to-category]"),
@@ -349,16 +353,15 @@ function attachGlobalEvents() {
   document.addEventListener("keydown", handleDropdownEscapeClose);
 
   document.addEventListener("keydown", handleKeyNavigation);
-  elements.startButton.addEventListener("click", startDrawingPhase);
+  elements.startButton.addEventListener("click", handleStartButtonClick);
   elements.resetAllButton.addEventListener("click", resetAll);
+  elements.intro.skip?.addEventListener("click", handleIntroSkip);
+  elements.intro.dialog?.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    handleIntroSkip();
+  });
   elements.drawing.openPicker?.addEventListener("click", openCardPicker);
   elements.drawing.pickButton?.addEventListener("click", pickCurrentCard);
-  elements.drawing.stackPrev?.addEventListener("click", () => {
-    shiftDeckIndex(-1);
-  });
-  elements.drawing.stackNext?.addEventListener("click", () => {
-    shiftDeckIndex(1);
-  });
   elements.drawing.closePicker?.addEventListener("click", closeCardPicker);
   elements.drawing.pickerDialog?.addEventListener("cancel", (event) => {
     event.preventDefault();
@@ -369,47 +372,14 @@ function attachGlobalEvents() {
     updateView("landing");
   });
   elements.results.restart.addEventListener("click", resetAll);
-  if (elements.drawing.cardStack) {
-    elements.drawing.cardStack.addEventListener("wheel", handleWheel, {
-      passive: false,
-    });
-    elements.drawing.cardStack.addEventListener(
-      "pointerdown",
-      handlePointerDown
-    );
-    elements.drawing.cardStack.addEventListener(
-      "pointermove",
-      handlePointerMove
-    );
-    elements.drawing.cardStack.addEventListener(
-      "pointerup",
-      handlePointerUp
-    );
-    elements.drawing.cardStack.addEventListener(
-      "pointercancel",
-      handlePointerUp
-    );
-    elements.drawing.cardStack.addEventListener(
-      "touchstart",
-      handleTouchStart,
-      {
-        passive: true,
-      }
-    );
-    elements.drawing.cardStack.addEventListener(
-      "touchmove",
-      handleTouchMove,
-      {
-        passive: false,
-      }
-    );
-    elements.drawing.cardStack.addEventListener(
-      "touchend",
-      handleTouchEnd,
-      {
-        passive: true,
-      }
-    );
+  if (elements.drawing.cardTrack) {
+    const track = elements.drawing.cardTrack;
+    track.addEventListener("scroll", handleTrackScroll, { passive: true });
+    track.addEventListener("wheel", handleTrackWheel, { passive: false });
+    track.addEventListener("pointerdown", handleTrackPointerDown);
+    track.addEventListener("pointermove", handleTrackPointerMove);
+    track.addEventListener("pointerup", handleTrackPointerUp);
+    track.addEventListener("pointercancel", handleTrackPointerUp);
   }
 }
 
@@ -524,6 +494,7 @@ function updateSelectionSummary() {
 }
 
 function startDrawingPhase() {
+  closeIntroSequence();
   if (!state.selectedCategory) return;
   initializeDeck();
   renderDrawingInterface();
@@ -535,6 +506,7 @@ function initializeDeck() {
   state.deck = shuffle(state.cards.slice());
   state.currentIndex = 0;
   state.selectedCards = [];
+  state.cardButtons = [];
 }
 
 function renderDrawingInterface() {
@@ -545,7 +517,7 @@ function renderDrawingInterface() {
   elements.drawing.description.textContent = category.drawDescription;
 
   renderPositionList(category.positions);
-  renderCardStack();
+  renderCardOptions();
   renderSelectedPreview();
   updatePickerInstruction();
   updateDrawingStatus();
@@ -574,7 +546,7 @@ function openCardPicker() {
   }
 
   updatePickerInstruction();
-  renderCardStack();
+  renderCardOptions();
 
   if (typeof elements.drawing.pickerDialog.showModal === "function") {
     elements.drawing.pickerDialog.showModal();
@@ -589,12 +561,17 @@ function openCardPicker() {
   }
 
   requestAnimationFrame(() => {
-    elements.drawing.cardStack?.focus({ preventScroll: true });
+    elements.drawing.cardTrack?.focus({ preventScroll: true });
   });
 }
 
 function closeCardPicker() {
   if (!elements.drawing.pickerDialog) return;
+  const track = elements.drawing.cardTrack;
+  if (track) {
+    track.classList.remove("dragging");
+  }
+  state.isDragging = false;
   if (typeof elements.drawing.pickerDialog.close === "function") {
     if (elements.drawing.pickerDialog.open) {
       elements.drawing.pickerDialog.close();
@@ -602,43 +579,6 @@ function closeCardPicker() {
   } else {
     elements.drawing.pickerDialog.removeAttribute("open");
   }
-}
-
-function renderCardStack() {
-  const cardStack = elements.drawing.cardStack;
-  if (!cardStack) return;
-  cardStack.innerHTML = "";
-
-  if (state.deck.length === 0) {
-    const placeholder = document.createElement("div");
-    placeholder.className = "stack-card inactive";
-    placeholder.dataset.state = "0";
-    cardStack.appendChild(placeholder);
-    return;
-  }
-
-  const offsets = [-3, -2, -1, 0, 1, 2, 3];
-  offsets.forEach((offset) => {
-    const index = normalizeIndex(state.currentIndex + offset, state.deck.length);
-    if (index === null) return;
-
-    const cardElement = document.createElement("div");
-    cardElement.className = "stack-card";
-    cardElement.dataset.state = String(offset);
-    cardElement.dataset.cardId = state.deck[index].card_id;
-
-    if (offset === 0) {
-      const label = document.createElement("span");
-      label.className = "stack-index";
-      label.textContent = `#${index + 1}`;
-      cardElement.appendChild(label);
-    }
-
-    if (state.deck.length <= Math.abs(offset)) {
-      cardElement.classList.add("inactive");
-    }
-    cardStack.appendChild(cardElement);
-  });
 }
 
 function renderSelectedPreview() {
@@ -741,142 +681,23 @@ function updateDrawingControls() {
   updatePickerInstruction();
 }
 
-function handleWheel(event) {
-  if (state.view !== "drawing") return;
-  if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
-  if (state.deck.length === 0) return;
-  if (Math.abs(event.deltaY) < 1) return;
-
-  event.preventDefault();
-  const normalized = Math.max(-160, Math.min(160, event.deltaY));
-  const delta = Math.round(normalized / 4);
-  const direction = delta !== 0 ? delta : normalized > 0 ? 2 : -2;
-  shiftDeckIndex(direction);
-}
-
 function handleKeyNavigation(event) {
   if (state.view !== "drawing") return;
   if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
   if (state.deck.length === 0) return;
 
-  const { key } = event;
-  if (key === "ArrowRight") {
-    shiftDeckIndex(1);
+  if (event.key === "ArrowRight") {
+    const next = Math.min(state.currentIndex + 1, state.deck.length - 1);
+    scrollToCard(next);
     event.preventDefault();
-  } else if (key === "ArrowLeft") {
-    shiftDeckIndex(-1);
+  } else if (event.key === "ArrowLeft") {
+    const prev = Math.max(state.currentIndex - 1, 0);
+    scrollToCard(prev);
     event.preventDefault();
-  } else if ((key === "Enter" || key === " ") && !elements.drawing.pickButton.disabled) {
+  } else if ((event.key === "Enter" || event.key === " ") && !elements.drawing.pickButton?.disabled) {
     pickCurrentCard();
     event.preventDefault();
   }
-}
-
-function shiftDeckIndex(steps) {
-  if (!Number.isFinite(steps) || steps === 0) return;
-  if (state.deck.length === 0) return;
-  if (!elements.drawing.cardStack) return;
-  state.shiftQueue += steps;
-  if (state.isShifting) return;
-  state.isShifting = true;
-  processShiftQueue();
-}
-
-function processShiftQueue() {
-  if (state.shiftQueue === 0 || state.deck.length === 0) {
-    state.isShifting = false;
-    state.shiftQueue = 0;
-    return;
-  }
-
-  const direction = state.shiftQueue > 0 ? 1 : -1;
-  state.shiftQueue -= direction;
-  applySingleShift(direction);
-
-  const remaining = Math.abs(state.shiftQueue);
-  const delay = Math.max(35, 150 - Math.min(110, remaining * 10));
-  window.setTimeout(processShiftQueue, delay);
-}
-
-function applySingleShift(direction) {
-  if (!elements.drawing.cardStack) return;
-  const stack = elements.drawing.cardStack;
-  stack.dataset.motion = direction > 0 ? "next" : "prev";
-  stack.classList.add("stack-animating");
-
-  if (stack.dataset.animationTimer) {
-    window.clearTimeout(Number(stack.dataset.animationTimer));
-  }
-
-  state.currentIndex =
-    normalizeIndex(state.currentIndex + direction, state.deck.length) ?? 0;
-  renderCardStack();
-
-  const timer = window.setTimeout(() => {
-    stack.classList.remove("stack-animating");
-    delete stack.dataset.motion;
-    delete stack.dataset.animationTimer;
-  }, 140);
-
-  stack.dataset.animationTimer = String(timer);
-}
-
-function handlePointerDown(event) {
-  if (state.view !== "drawing") return;
-  if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
-  if (state.deck.length === 0) return;
-  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-  elements.drawing.cardStack?.setPointerCapture(event.pointerId);
-  state.touchStartX = event.clientX;
-  state.touchStartY = event.clientY;
-  state.touchLastX = event.clientX;
-  state.touchLastY = event.clientY;
-  state.touchActive = true;
-}
-
-function handlePointerMove(event) {
-  if (!state.touchActive) return;
-  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-  if (state.touchStartX === null || state.touchStartY === null) return;
-
-  state.touchLastX = event.clientX;
-  state.touchLastY = event.clientY;
-
-  const deltaX = event.clientX - state.touchStartX;
-  const deltaY = event.clientY - state.touchStartY;
-
-  if (Math.abs(deltaX) < 12 || Math.abs(deltaX) < Math.abs(deltaY)) {
-    return;
-  }
-
-  event.preventDefault();
-}
-
-function handlePointerUp(event) {
-  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-  if (state.touchActive && state.touchStartX !== null && state.touchLastX !== null) {
-    const deltaX = state.touchLastX - state.touchStartX;
-    const deltaY =
-      state.touchLastY !== null && state.touchStartY !== null
-        ? state.touchLastY - state.touchStartY
-        : 0;
-    if (Math.abs(deltaX) > 18 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      const normalized = Math.max(-800, Math.min(800, deltaX));
-      const steps = Math.round(normalized / 18) || (deltaX > 0 ? -4 : 4);
-      shiftDeckIndex(steps);
-    }
-  }
-  if (
-    elements.drawing.cardStack &&
-    elements.drawing.cardStack.hasPointerCapture(event.pointerId)
-  ) {
-    elements.drawing.cardStack.releasePointerCapture(event.pointerId);
-  }
-  state.touchActive = false;
-  state.touchStartX = null;
-  state.touchStartY = null;
-  state.touchLastX = null;
-  state.touchLastY = null;
 }
 
 function pickCurrentCard() {
@@ -894,10 +715,10 @@ function pickCurrentCard() {
   if (state.deck.length === 0) {
     state.currentIndex = 0;
   } else if (state.currentIndex >= state.deck.length) {
-    state.currentIndex = 0;
+    state.currentIndex = state.deck.length - 1;
   }
 
-  renderCardStack();
+  renderCardOptions();
   renderSelectedPreview();
   updateDrawingStatus();
   updateDrawingControls();
@@ -906,9 +727,10 @@ function pickCurrentCard() {
 
   if (categoryComplete) {
     elements.drawing.openPicker?.focus({ preventScroll: true });
-  } else if (elements.drawing.cardStack) {
+  } else {
     requestAnimationFrame(() => {
-      elements.drawing.cardStack?.focus({ preventScroll: true });
+      scrollToCard(state.currentIndex, "auto");
+      elements.drawing.cardTrack?.focus({ preventScroll: true });
     });
   }
 }
@@ -1146,6 +968,10 @@ function extractTopKeywords(keywords) {
 }
 
 function updateView(nextView) {
+  if (nextView !== "drawing" && state.scrollRAF) {
+    cancelAnimationFrame(state.scrollRAF);
+    state.scrollRAF = null;
+  }
   if (nextView !== "drawing") {
     closeCardPicker();
   }
@@ -1156,17 +982,17 @@ function updateView(nextView) {
 
   if (nextView === "landing") {
     elements.startButton.disabled = !state.selectedCategory;
-    closeCardPicker();
   }
 }
 
 function resetAll() {
+  closeIntroSequence();
   state.selectedCategory = null;
   state.selectedCards = [];
   state.deck = [];
   state.currentIndex = 0;
-  state.shiftQueue = 0;
-  state.isShifting = false;
+  state.cardButtons = [];
+  state.scrollRAF = null;
   elements.dropdownLabel.textContent = "카테고리 선택";
   elements.startButton.disabled = true;
   updateSelectionSummary();
@@ -1187,6 +1013,211 @@ function normalizeIndex(index, length) {
   if (length === 0) return null;
   const modulo = ((index % length) + length) % length;
   return modulo;
+}
+
+function renderCardOptions() {
+  const track = elements.drawing.cardTrack;
+  if (!track) return;
+
+  if (state.scrollRAF) {
+    cancelAnimationFrame(state.scrollRAF);
+    state.scrollRAF = null;
+  }
+
+  track.classList.remove("dragging");
+  state.isDragging = false;
+  state.dragStartX = 0;
+  state.dragStartScrollLeft = 0;
+
+  track.innerHTML = "";
+  state.cardButtons = [];
+
+  if (state.deck.length === 0) {
+    return;
+  }
+
+  const initialIndex = Math.min(
+    Math.max(state.currentIndex, 0),
+    Math.max(state.deck.length - 1, 0)
+  );
+
+  state.deck.forEach((_card, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "card-option";
+    button.dataset.index = String(index);
+    button.setAttribute("aria-label", `카드 ${index + 1}`);
+    button.innerHTML = `<img src="image/0_Tarot_Card_Back.png" alt="카드 ${index + 1}" loading="lazy" />`;
+    button.addEventListener("click", () => {
+      scrollToCard(index);
+    });
+    state.cardButtons.push(button);
+    track.appendChild(button);
+  });
+
+  setActiveCard(initialIndex);
+  requestAnimationFrame(() => {
+    scrollToCard(initialIndex, "auto");
+  });
+}
+
+function scrollToCard(index, behavior = "smooth") {
+  const track = elements.drawing.cardTrack;
+  const button = state.cardButtons[index];
+  if (!track || !button) return;
+  const target =
+    button.offsetLeft - (track.clientWidth - button.offsetWidth) / 2;
+  const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+  const clamped = Math.min(maxScroll, Math.max(0, target));
+  track.scrollTo({ left: clamped, behavior });
+  setActiveCard(index);
+}
+
+function setActiveCard(index) {
+  if (!state.cardButtons.length) return;
+  const normalized = normalizeIndex(index, state.deck.length);
+  if (normalized === null) return;
+  state.currentIndex = normalized;
+  state.cardButtons.forEach((button, idx) => {
+    button.classList.toggle("active", idx === state.currentIndex);
+  });
+}
+
+function handleTrackWheel(event) {
+  if (state.view !== "drawing") return;
+  if (!elements.drawing.pickerDialog?.open) return;
+  const track = elements.drawing.cardTrack;
+  if (!track) return;
+  event.preventDefault();
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+    ? event.deltaX
+    : event.deltaY;
+  track.scrollLeft += delta;
+  handleTrackScroll();
+}
+
+function handleTrackPointerDown(event) {
+  if (state.view !== "drawing") return;
+  if (!elements.drawing.pickerDialog?.open) return;
+  if (event.pointerType === "mouse" && event.button !== 0) return;
+  const track = elements.drawing.cardTrack;
+  if (!track) return;
+  state.isDragging = true;
+  state.dragStartX = event.clientX;
+  state.dragStartScrollLeft = track.scrollLeft;
+  track.classList.add("dragging");
+  track.setPointerCapture?.(event.pointerId);
+}
+
+function handleTrackPointerMove(event) {
+  if (!state.isDragging) return;
+  const track = elements.drawing.cardTrack;
+  if (!track) return;
+  event.preventDefault();
+  const delta = event.clientX - state.dragStartX;
+  track.scrollLeft = state.dragStartScrollLeft - delta;
+  handleTrackScroll();
+}
+
+function handleTrackPointerUp(event) {
+  if (!state.isDragging) return;
+  const track = elements.drawing.cardTrack;
+  if (!track) return;
+  state.isDragging = false;
+  if (track.hasPointerCapture?.(event.pointerId)) {
+    track.releasePointerCapture(event.pointerId);
+  }
+  track.classList.remove("dragging");
+  updateActiveCardFromScroll();
+}
+
+function handleTrackScroll() {
+  if (state.scrollRAF) {
+    cancelAnimationFrame(state.scrollRAF);
+  }
+  state.scrollRAF = requestAnimationFrame(updateActiveCardFromScroll);
+}
+
+function updateActiveCardFromScroll() {
+  state.scrollRAF = null;
+  const track = elements.drawing.cardTrack;
+  if (!track || !state.cardButtons.length) return;
+
+  const center = track.scrollLeft + track.clientWidth / 2;
+  let closestIndex = 0;
+  let minDistance = Infinity;
+
+  state.cardButtons.forEach((button, index) => {
+    const buttonCenter = button.offsetLeft + button.offsetWidth / 2;
+    const distance = Math.abs(buttonCenter - center);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  setActiveCard(closestIndex);
+}
+
+function handleStartButtonClick() {
+  if (!state.selectedCategory) return;
+  const introShown = openIntroSequence();
+  if (!introShown) {
+    startDrawingPhase();
+  }
+}
+
+function openIntroSequence() {
+  const { dialog } = elements.intro;
+  if (!dialog) {
+    return false;
+  }
+  if (state.isIntroPlaying) {
+    return true;
+  }
+  state.isIntroPlaying = true;
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "");
+  }
+  if (state.introTimeoutId) {
+    clearTimeout(state.introTimeoutId);
+  }
+  state.introTimeoutId = window.setTimeout(() => {
+    handleIntroTimeout();
+  }, 5000);
+  return true;
+}
+
+function handleIntroTimeout() {
+  if (!state.isIntroPlaying) return;
+  closeIntroSequence();
+  startDrawingPhase();
+}
+
+function handleIntroSkip() {
+  if (!state.selectedCategory) return;
+  closeIntroSequence();
+  startDrawingPhase();
+}
+
+function closeIntroSequence() {
+  const { dialog } = elements.intro;
+  state.isIntroPlaying = false;
+  if (state.introTimeoutId) {
+    clearTimeout(state.introTimeoutId);
+    state.introTimeoutId = null;
+  }
+  if (dialog) {
+    if (typeof dialog.close === "function") {
+      if (dialog.open) {
+        dialog.close();
+      }
+    } else {
+      dialog.removeAttribute("open");
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
