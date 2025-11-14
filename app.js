@@ -233,6 +233,9 @@ const state = {
   currentIndex: 0,
   view: "landing",
   dropdownOpen: false,
+  touchStartX: null,
+  touchStartY: null,
+  touchActive: false,
 };
 
 const elements = {
@@ -367,6 +370,27 @@ function attachGlobalEvents() {
     elements.drawing.cardStack.addEventListener("wheel", handleWheel, {
       passive: false,
     });
+    elements.drawing.cardStack.addEventListener(
+      "touchstart",
+      handleTouchStart,
+      {
+        passive: true,
+      }
+    );
+    elements.drawing.cardStack.addEventListener(
+      "touchmove",
+      handleTouchMove,
+      {
+        passive: false,
+      }
+    );
+    elements.drawing.cardStack.addEventListener(
+      "touchend",
+      handleTouchEnd,
+      {
+        passive: true,
+      }
+    );
   }
 }
 
@@ -749,6 +773,46 @@ function shiftDeckIndex(direction) {
   }, 260);
 
   stack.dataset.animationTimer = String(timer);
+}
+
+function handleTouchStart(event) {
+  if (state.view !== "drawing") return;
+  if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
+  if (state.deck.length === 0) return;
+  const touch = event.touches[0];
+  if (!touch) return;
+  state.touchStartX = touch.clientX;
+  state.touchStartY = touch.clientY;
+  state.touchActive = true;
+}
+
+function handleTouchMove(event) {
+  if (!state.touchActive) return;
+  if (state.touchStartX === null || state.touchStartY === null) return;
+
+  const touch = event.touches[0];
+  if (!touch) return;
+
+  const deltaX = touch.clientX - state.touchStartX;
+  const deltaY = touch.clientY - state.touchStartY;
+
+  if (Math.abs(deltaX) < 20 || Math.abs(deltaX) < Math.abs(deltaY)) {
+    return;
+  }
+
+  event.preventDefault();
+  state.touchActive = false;
+  if (deltaX > 0) {
+    shiftDeckIndex(-1);
+  } else {
+    shiftDeckIndex(1);
+  }
+}
+
+function handleTouchEnd() {
+  state.touchActive = false;
+  state.touchStartX = null;
+  state.touchStartY = null;
 }
 
 function pickCurrentCard() {
