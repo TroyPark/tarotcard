@@ -821,9 +821,9 @@ function handleTouchEnd() {
       state.touchLastY !== null && state.touchStartY !== null
         ? state.touchLastY - state.touchStartY
         : 0;
-    if (Math.abs(deltaX) > 25 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      const normalized = Math.max(-400, Math.min(400, deltaX));
-      const steps = Math.round(normalized / 25) || (deltaX > 0 ? -2 : 2);
+    if (Math.abs(deltaX) > 20 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      const normalized = Math.max(-600, Math.min(600, deltaX));
+      const steps = Math.round(normalized / 20) || (deltaX > 0 ? -3 : 3);
       shiftDeckIndex(steps);
     }
   }
