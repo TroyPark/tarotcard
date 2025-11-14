@@ -617,7 +617,7 @@ function renderSelectedPreview() {
       caption.textContent = selected.card.ko_name;
       caption.style.margin = "0";
       caption.style.fontSize = "0.95rem";
-      caption.style.color = "#59487f";
+      caption.style.color = "#f6c372";
       slot.appendChild(caption);
     }
 
