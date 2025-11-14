@@ -259,6 +259,9 @@ const elements = {
     cardStack: document.querySelector("[data-card-stack]"),
     pickButton: document.querySelector("[data-pick-card]"),
     closePicker: document.querySelector("[data-close-picker]"),
+    stackControls: document.querySelector("[data-stack-controls]"),
+    stackPrev: document.querySelector("[data-stack-prev]"),
+    stackNext: document.querySelector("[data-stack-next]"),
     preview: document.querySelector("[data-selected-preview]"),
     showResults: document.querySelector("[data-show-results]"),
     backToCategory: document.querySelector("[data-back-to-category]"),
@@ -344,6 +347,12 @@ function attachGlobalEvents() {
   elements.resetAllButton.addEventListener("click", resetAll);
   elements.drawing.openPicker?.addEventListener("click", openCardPicker);
   elements.drawing.pickButton?.addEventListener("click", pickCurrentCard);
+  elements.drawing.stackPrev?.addEventListener("click", () => {
+    shiftDeckIndex(-1);
+  });
+  elements.drawing.stackNext?.addEventListener("click", () => {
+    shiftDeckIndex(1);
+  });
   elements.drawing.closePicker?.addEventListener("click", closeCardPicker);
   elements.drawing.pickerDialog?.addEventListener("cancel", (event) => {
     event.preventDefault();
@@ -693,6 +702,7 @@ function handleWheel(event) {
   if (state.view !== "drawing") return;
   if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
   if (state.deck.length === 0) return;
+  if (Math.abs(event.deltaY) < 1) return;
 
   event.preventDefault();
   const direction = event.deltaY > 0 ? 1 : -1;
