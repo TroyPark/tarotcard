@@ -435,7 +435,7 @@ textarea {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 .card-track.dragging {
