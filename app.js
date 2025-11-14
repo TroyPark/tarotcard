@@ -374,6 +374,22 @@ function attachGlobalEvents() {
       passive: false,
     });
     elements.drawing.cardStack.addEventListener(
+      "pointerdown",
+      handlePointerDown
+    );
+    elements.drawing.cardStack.addEventListener(
+      "pointermove",
+      handlePointerMove
+    );
+    elements.drawing.cardStack.addEventListener(
+      "pointerup",
+      handlePointerUp
+    );
+    elements.drawing.cardStack.addEventListener(
+      "pointercancel",
+      handlePointerUp
+    );
+    elements.drawing.cardStack.addEventListener(
       "touchstart",
       handleTouchStart,
       {
@@ -780,53 +796,51 @@ function shiftDeckIndex(direction) {
   stack.dataset.animationTimer = String(timer);
 }
 
-function handleTouchStart(event) {
+function handlePointerDown(event) {
   if (state.view !== "drawing") return;
   if (!elements.drawing.pickerDialog || !elements.drawing.pickerDialog.open) return;
   if (state.deck.length === 0) return;
-  const touch = event.touches[0];
-  if (!touch) return;
-  state.touchStartX = touch.clientX;
-  state.touchStartY = touch.clientY;
-  state.touchLastX = touch.clientX;
-  state.touchLastY = touch.clientY;
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+  elements.drawing.cardStack?.setPointerCapture(event.pointerId);
+  state.touchStartX = event.clientX;
+  state.touchStartY = event.clientY;
+  state.touchLastX = event.clientX;
+  state.touchLastY = event.clientY;
   state.touchActive = true;
 }
 
-function handleTouchMove(event) {
+function handlePointerMove(event) {
   if (!state.touchActive) return;
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
   if (state.touchStartX === null || state.touchStartY === null) return;
 
-  const touch = event.touches[0];
-  if (!touch) return;
+  state.touchLastX = event.clientX;
+  state.touchLastY = event.clientY;
 
-  state.touchLastX = touch.clientX;
-  state.touchLastY = touch.clientY;
+  const deltaX = event.clientX - state.touchStartX;
+  const deltaY = event.clientY - state.touchStartY;
 
-  const deltaX = touch.clientX - state.touchStartX;
-  const deltaY = touch.clientY - state.touchStartY;
-
-  if (Math.abs(deltaX) < 15 || Math.abs(deltaX) < Math.abs(deltaY)) {
+  if (Math.abs(deltaX) < 12 || Math.abs(deltaX) < Math.abs(deltaY)) {
     return;
   }
 
   event.preventDefault();
-  // keep active; actual shift will happen on touchend to avoid multiple triggers
 }
 
-function handleTouchEnd() {
+function handlePointerUp(event) {
   if (state.touchActive && state.touchStartX !== null && state.touchLastX !== null) {
     const deltaX = state.touchLastX - state.touchStartX;
     const deltaY =
       state.touchLastY !== null && state.touchStartY !== null
         ? state.touchLastY - state.touchStartY
         : 0;
-    if (Math.abs(deltaX) > 20 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      const normalized = Math.max(-600, Math.min(600, deltaX));
-      const steps = Math.round(normalized / 20) || (deltaX > 0 ? -3 : 3);
+    if (Math.abs(deltaX) > 18 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      const normalized = Math.max(-800, Math.min(800, deltaX));
+      const steps = Math.round(normalized / 18) || (deltaX > 0 ? -4 : 4);
       shiftDeckIndex(steps);
     }
   }
+  elements.drawing.cardStack?.releasePointerCapture(event.pointerId);
   state.touchActive = false;
   state.touchStartX = null;
   state.touchStartY = null;
