@@ -612,6 +612,8 @@ textarea {
   padding: 2.1rem 2.3rem 1.9rem;
   display: grid;
   gap: 1.6rem;
+  max-height: 85vh;
+  overflow-y: auto;
 }
 
 .card-picker-header h2 {
