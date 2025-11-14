@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>타로 점 보기</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="타로 점 보기" />
+    <meta
+      property="og:description"
+      content="원하는 주제에 맞춰 타로 카드를 직접 뽑고 해석까지 확인해 보세요."
+    />
+    <meta
+      property="og:image"
+      content="image/0_Tarot_Card_Back.png"
+    />
+    <meta property="og:image:width" content="1433" />
+    <meta property="og:image:height" content="1894" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="타로 점 보기" />
+    <meta
+      name="twitter:description"
+      content="마음에 끌리는 카드를 뽑아 오늘의 메시지를 확인해 보세요."
+    />
+    <meta
+      name="twitter:image"
+      content="image/0_Tarot_Card_Back.png"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="app-header">
+        <h1>타로 점 보기</h1>
+        <p>
+          원하는 주제를 고르고 직접 카드를 뽑아보세요. 78장의 카드 덱을
+          마우스 휠로 굴리며 나에게 끌리는 카드를 선택하면, 맞춤 해석과 전체
+          흐름 요약을 확인할 수 있습니다.
+        </p>
+      </header>
+
+      <main class="app-main">
+        <section id="view-landing" class="view active" aria-live="polite">
+          <div class="panel landing-panel">
+            <h2>1. 리딩 카테고리를 선택하세요</h2>
+            <div class="dropdown" data-dropdown>
+              <button
+                class="dropdown-toggle"
+                type="button"
+                data-dropdown-toggle
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="category-menu"
+              >
+                <span data-dropdown-label>카테고리 선택</span>
+                <span class="dropdown-icon" aria-hidden="true">▾</span>
+              </button>
+              <ul
+                class="dropdown-menu hidden"
+                id="category-menu"
+                role="listbox"
+                data-dropdown-menu
+              ></ul>
+            </div>
+            <div class="selection-summary" data-selection-summary>
+              카테고리를 선택하면 필요한 카드 장 수와 추천 포지션을 안내해
+              드립니다.
+            </div>
+            <div class="landing-actions">
+              <button class="primary" data-start disabled>
+                카드 선택하러 가기
+              </button>
+              <button class="secondary" data-reset-all>초기화</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-drawing" class="view" aria-live="polite">
+          <div class="panel drawing-panel">
+            <div class="drawing-header">
+              <div>
+                <h2 data-view-title></h2>
+                <p data-view-description></p>
+              </div>
+              <div class="drawing-status">
+                <span data-pick-progress>0장 선택됨</span>
+                <span data-deck-count>덱 0장 남음</span>
+              </div>
+            </div>
+
+            <div class="drawing-body">
+              <aside class="position-guide">
+                <h3>이 리딩이 요구하는 포지션</h3>
+                <ol data-position-list></ol>
+              </aside>
+
+              <div class="card-picker-intro">
+                <p>
+                  카드 선택하기 버튼을 누르면 78장의 덱이 펼쳐집니다. 카드가
+                  나올 때까지 집중해서 마음의 신호를 따라가 보세요.
+                </p>
+                <button class="primary" data-open-picker disabled>
+                  카드 선택하기
+                </button>
+              </div>
+            </div>
+
+            <div class="selected-preview" data-selected-preview></div>
+
+            <div class="drawing-actions">
+              <button class="primary" data-show-results disabled>
+                결과 보기
+              </button>
+              <button class="secondary" data-back-to-category>
+                카테고리 다시 선택
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-results" class="view" aria-live="polite">
+          <div class="panel results-panel">
+            <div class="result-loading" data-result-loading>
+              <div class="loading-spinner" aria-hidden="true"></div>
+              <p>결과를 생각중입니다...</p>
+            </div>
+            <header class="results-header">
+              <div>
+                <h2 data-results-title></h2>
+                <p data-results-description></p>
+              </div>
+              <button class="secondary" data-restart>다시 시작하기</button>
+            </header>
+
+            <div class="result-cards" data-results-cards></div>
+
+            <article class="result-summary">
+              <h3>전체 메시지</h3>
+              <div class="result-summary-body" data-overall-summary></div>
+            </article>
+
+            <article class="result-keywords">
+              <h3>핵심 키워드</h3>
+              <div class="keyword-chips" data-keyword-chips></div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="app-footer">
+        <p>© 2025 Tarot Navigator · 78장의 순수한 확률 덱을 활용한 웹 리딩</p>
+      </footer>
+    </div>
+
+    <dialog id="intro-video-dialog" class="intro-video-modal" data-intro-dialog>
+      <article class="intro-video-content">
+        <div class="intro-video-frame">
+          <img
+            data-intro-gif
+            src="Tarot_Card_Shuffle_Motion.gif"
+            alt="타로 카드가 섞이는 장면"
+          />
+        </div>
+      </article>
+    </dialog>
+
+    <dialog id="card-picker-dialog" class="card-picker-modal" data-card-picker>
+      <button class="modal-close" type="button" data-close-picker aria-label="닫기">
+        ×
+      </button>
+      <article class="card-picker-content" data-card-picker-content>
+        <header class="card-picker-header">
+          <h2>카드를 선택하세요</h2>
+          <p>마우스 휠이나 ← → 키로 덱을 움직인 뒤 마음에 든 카드를 선택하세요.</p>
+        </header>
+        <p class="card-position-instruction" data-position-instruction></p>
+        <div class="card-slider" data-card-slider>
+          <div class="card-track" data-card-track aria-label="카드 덱" tabindex="0"></div>
+        </div>
+        <p class="slider-hint">
+          좌우로 넘기며 마음에 드는 카드에 멈춘 뒤 선택 버튼을 눌러주세요.
+        </p>
+        <div class="card-picker-actions">
+          <button class="primary" data-pick-card>이 카드 선택</button>
+        </div>
+      </article>
+    </dialog>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
+
