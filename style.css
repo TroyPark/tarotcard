@@ -405,6 +405,7 @@ textarea {
   aspect-ratio: 1792 / 2368;
   position: relative;
   outline: none;
+  touch-action: pan-y;
 }
 
 .card-stack::after {
@@ -476,6 +477,7 @@ textarea {
   top: 50%;
   z-index: 6;
   opacity: 1;
+  touch-action: pan-y;
 }
 
 .stack-card[data-state="0"] .stack-index {
