@@ -772,8 +772,33 @@ function handleKeyNavigation(event) {
   }
 }
 
-function shiftDeckIndex(direction) {
+function shiftDeckIndex(steps) {
+  if (!Number.isFinite(steps) || steps === 0) return;
   if (state.deck.length === 0) return;
+  if (!elements.drawing.cardStack) return;
+  state.shiftQueue += steps;
+  if (state.isShifting) return;
+  state.isShifting = true;
+  processShiftQueue();
+}
+
+function processShiftQueue() {
+  if (state.shiftQueue === 0 || state.deck.length === 0) {
+    state.isShifting = false;
+    state.shiftQueue = 0;
+    return;
+  }
+
+  const direction = state.shiftQueue > 0 ? 1 : -1;
+  state.shiftQueue -= direction;
+  applySingleShift(direction);
+
+  const remaining = Math.abs(state.shiftQueue);
+  const delay = Math.max(35, 150 - Math.min(110, remaining * 10));
+  window.setTimeout(processShiftQueue, delay);
+}
+
+function applySingleShift(direction) {
   if (!elements.drawing.cardStack) return;
   const stack = elements.drawing.cardStack;
   stack.dataset.motion = direction > 0 ? "next" : "prev";
@@ -791,7 +816,7 @@ function shiftDeckIndex(direction) {
     stack.classList.remove("stack-animating");
     delete stack.dataset.motion;
     delete stack.dataset.animationTimer;
-  }, 260);
+  }, 140);
 
   stack.dataset.animationTimer = String(timer);
 }
@@ -828,6 +853,7 @@ function handlePointerMove(event) {
 }
 
 function handlePointerUp(event) {
+  if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
   if (state.touchActive && state.touchStartX !== null && state.touchLastX !== null) {
     const deltaX = state.touchLastX - state.touchStartX;
     const deltaY =
@@ -840,7 +866,12 @@ function handlePointerUp(event) {
       shiftDeckIndex(steps);
     }
   }
-  elements.drawing.cardStack?.releasePointerCapture(event.pointerId);
+  if (
+    elements.drawing.cardStack &&
+    elements.drawing.cardStack.hasPointerCapture(event.pointerId)
+  ) {
+    elements.drawing.cardStack.releasePointerCapture(event.pointerId);
+  }
   state.touchActive = false;
   state.touchStartX = null;
   state.touchStartY = null;
@@ -1134,6 +1165,8 @@ function resetAll() {
   state.selectedCards = [];
   state.deck = [];
   state.currentIndex = 0;
+  state.shiftQueue = 0;
+  state.isShifting = false;
   elements.dropdownLabel.textContent = "카테고리 선택";
   elements.startButton.disabled = true;
   updateSelectionSummary();
