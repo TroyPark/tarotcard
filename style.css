@@ -542,6 +542,36 @@ textarea {
   text-align: center;
 }
 
+.card-stack-controls {
+  display: none;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.stack-control-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(90, 142, 255, 0.4);
+  background: rgba(6, 12, 32, 0.82);
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.stack-control-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(6, 8, 30, 0.45);
+}
+
+.stack-control-button:active {
+  transform: translateY(0);
+}
+
 .card-picker-modal {
   border: none;
   border-radius: 26px;
@@ -862,5 +892,18 @@ textarea {
   .results-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .card-stack {
+    width: clamp(180px, 70vw, 260px);
+  }
+
+  .card-stack-controls {
+    display: flex;
+    margin-top: 0.4rem;
+  }
+
+  .stack-hint {
+    display: none;
   }
 }
